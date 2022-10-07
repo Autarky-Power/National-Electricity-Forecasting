@@ -9,7 +9,7 @@ getwd()
 ## Temperature values, transformed temperature values in heating and cooling days and seasonal regressors
 ## (months, days) are already provided. Detailed information can be found in the associated study.
 
-MT_deterministic_data <- read.csv("./Data/mid_deterministic_data.csv")
+MT_deterministic_data <- read.csv("./data_for_R_code/mid_deterministic_data.csv")
 
 # make a training set until end of 2018
 mid_training = MT_deterministic_data[1:2190,]
@@ -32,17 +32,17 @@ global_mid_model <- lm(mt_formula, data= mid_training,na.action="na.fail")
 # will take a very long time - depending on the available computing power around 12-24 hours
 combinations_mid <- dredge(global_mid_model)
 
-#write.csv(combinations_mid,"./Data/midterm_combinations_final.csv",row.names = F)
+#write.csv(combinations_mid,"./data_for_R_code/midterm_combinations_final.csv",row.names = F)
 # The complete file is very large and only very few models are needed, therefore 
 # the file is trimmed to below 50 MB
-write.csv(combinations_mid[1:200000,],"./Data/midterm_combinations_final_trimmed.csv",row.names = F)
+write.csv(combinations_mid[1:200000,],"./data_for_R_code/midterm_combinations_final_trimmed.csv",row.names = F)
 
 
 
 ### LOAD RESULTS IN THIS SECTION TO SKIP 12h COMPUTATION TIME  
 #   Continue with evaluating the model results ----
 
-combination_mid_final <-read.csv("./Data/midterm_combinations_final_trimmed.csv")
+combination_mid_final <-read.csv("./data_for_R_code/midterm_combinations_final_trimmed.csv")
 
 
 ## manually inspect the best models (top of the list) 
@@ -87,7 +87,7 @@ variables_final= c(variables_mid,variables_best_month)
 formula_final <- as.formula(paste("mid_load", paste(variables_final, collapse = " + "), 
                                 sep = " ~ "))
 model_final <- lm(formula_final, data= mid_training,na.action="na.fail")
-save(model_final,file = "./Models/midterm_deterministic/model_final.Rdata")
+save(model_final,file = "./data_for_R_code/model_final.Rdata")
 
 ### Linear regressive mid-term model is done, residuals are calculated now for the LSTM and ARIMA models 
 
@@ -100,19 +100,19 @@ MT_deterministic_data$lm_pred <- MT[,1]
 
 
 ### Save dataframe for LSTM script and ARIMA Calculation
-write.csv(MT_deterministic_data,"./Data/midterm_ML.csv", row.names = F)
-write.csv(MT_deterministic_data,"./data/midterm_det.csv", row.names = F )
+write.csv(MT_deterministic_data,"./data_for_R_code/midterm_ML.csv", row.names = F)
+write.csv(MT_deterministic_data,"./data_for_R_code/midterm_det.csv", row.names = F )
 
 
 ###### Load machine learning LSTM results ######## 
 ## Note: Code for the LSTM is proprietary owned by the DLR Oldenburg, so only the output
 ## of the model can be made publicly available
 
-LSTM_results <- read.csv("./data/LSTMresults.csv") 
+LSTM_results <- read.csv("./data_for_R_code/LSTMresults.csv") 
 MT_deterministic_data$lstm <- 0
 MT_deterministic_data$lstm[2191:2920] <- LSTM_results$prediction
 
-write.csv(MT_deterministic_data, "./data/midterm_det.csv",row.names = F)
+write.csv(MT_deterministic_data, "./data_for_R_code/midterm_det.csv",row.names = F)
 
 
 ###### ARIMA calculation ######## 
@@ -121,14 +121,14 @@ write.csv(MT_deterministic_data, "./data/midterm_det.csv",row.names = F)
         
 
 # load deterministic model and residuals
-load("./Models/midterm_deterministic/model_final.Rdata")
-MT_deterministic_data <- read.csv("./data/midterm_det.csv")
+load("./data_for_R_code/model_final.Rdata")
+MT_deterministic_data <- read.csv("./data_for_R_code/midterm_det.csv")
 
 
 ###### ARIMA calculation ######## 
 
 # load deterministic model and residuals
-load("./Models/midterm_deterministic/model_final.Rdata")
+load("./data_for_R_code/model_final.Rdata")
 
 library(tseries)
 library(forecast)
@@ -179,10 +179,10 @@ for (k in 1:27){
   }}
 
 ## If calculated write the results: 
-#write.csv(test_df,"./Data/mid_ARIMA_results.csv",row.names = F )
+#write.csv(test_df,"./data_for_R_code/mid_ARIMA_results.csv",row.names = F )
 
 ## If not calculated load the results: 
-test_df <- read.csv("./Data/mid_ARIMA_results.csv")
+test_df <- read.csv("./data_for_R_code/mid_ARIMA_results.csv")
 
 test_df<- test_df[is.na(test_df$sum_all)==F,]
 p_order <- test_df$p[test_df$sum_all==min(test_df$sum_all)]
@@ -191,7 +191,7 @@ q_order <- test_df$q[test_df$sum_all==min(test_df$sum_all)]
 
 best_model_mid <- Arima(res, order = c(p_order, d, q_order))
 
-save(best_model_mid,file="./Models/midterm_stochastic/fit.mid.Rdata")
+save(best_model_mid,file="./data_for_R_code/fit.mid.Rdata")
 
 
 ### Add linear regressors to ARIMA ----
@@ -293,7 +293,7 @@ res_comparism
 
 # Save Arima model with regressors 
 
-save(best_model_mid_with_reg,file = "./models/midterm_stochastic/final_ARIMA_mid.Rdata")
+save(best_model_mid_with_reg,file = "./data_for_R_code/final_ARIMA_mid.Rdata")
 
 
 ###### Save all model results ######## 
@@ -304,7 +304,7 @@ midterm_model_results$full_model <- midterm_model_results$lm_pred+midterm_model_
 midterm_model_results$res_full_model <- midterm_model_results$mid_load -midterm_model_results$full_model
 
 
-write.csv(midterm_model_results,"./data/midterm_model_results.csv",row.names = F)
+write.csv(midterm_model_results,"./data_for_R_code/midterm_model_results.csv",row.names = F)
 
 
 ###### Plot results ######## 
@@ -313,7 +313,7 @@ library(patchwork)
 # load local library for plotting
 source('./ggplot_theme_Publication/ggplot_theme_Publication-2.R')
 
-midterm_model_results <- read.csv("./data/midterm_model_results")
+midterm_model_results <- read.csv("./data_for_R_code/midterm_model_results.csv")
 
 
 MTplot_overview <- ggplot(midterm_model_results)+geom_line(aes(index,mid_load,color="actual"),lwd=1.3)+
@@ -330,7 +330,7 @@ MTplot_overview <- ggplot(midterm_model_results)+geom_line(aes(index,mid_load,co
 
 MTplot_overview
 
-ggsave(file="./Plots/MTplot_overview.png", plot=MTplot_overview, width=12, height=8)
+ggsave(file="./plots/MTplot_overview.png", plot=MTplot_overview, width=12, height=8)
 
 
 # Residual plots
@@ -371,7 +371,7 @@ MTres3
 MTresiduals<-MTres1 /(MTres2+MTres3)
 MTresiduals
 
-ggsave(file="./Plots/MTplot_residuals.png", plot=MTresiduals, width=12, height=8)
+ggsave(file="./plots/MTplot_residuals.png", plot=MTresiduals, width=12, height=8)
 
 
 

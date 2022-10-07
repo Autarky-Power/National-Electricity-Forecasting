@@ -7,7 +7,7 @@ getwd()
 
 
 ## load data
-STmodel_data <- read.csv('./Data/STmodel_data.csv')
+STmodel_data <- read.csv('./data_for_R_code/STmodel_data.csv')
 STmodel_data$Consumption <- STmodel_data$dif
 
 
@@ -46,7 +46,7 @@ for (i in 1:12){
     AICc(fit1)
     
     name=paste0("month",i,wday[j])
-    modelname=paste0("./Models/shortterm_deterministic/",name,".Rdata")
+    modelname=paste0("./data_for_R_code/shortterm_models/",name,".Rdata")
     save(fit1,file=modelname)
     fv <- data.frame(fit1$fitted.values)
     model_st[k:(k+23),(i+2)] <- fv[1:24,]
@@ -61,7 +61,7 @@ for (i in 1:12){
 
 # Save the dataframes with model results
 
-write.csv(model.st,"./Data/st_det_model_training_set.csv",row.names = FALSE )
+write.csv(model.st,"./data_for_R_code/st_det_model_training_set.csv",row.names = FALSE )
 
 
 # Combine the results
@@ -85,10 +85,11 @@ STmodel_data$res_actual <- STmodel_data$Consumption - STmodel_data$deterministic
 
 # Save the combined dataframe
 
-write.csv(STmodel_data,"./Data/STmodel_data.csv",row.names = FALSE )
+write.csv(STmodel_data,"./data_for_R_code/STmodel_data.csv",row.names = FALSE )
 
 
 # plot a sample week
+source('./ggplot_theme_Publication/ggplot_theme_Publication-2.R')
 
 STmodel_data$index <- 1:nrow(STmodel_data)
 sample=STmodel_data$index[STmodel_data$year==2018 & STmodel_data$month==12 & STmodel_data$wday=='Mo']
@@ -107,7 +108,7 @@ ggplot() + geom_line(aes(STmodel_data$index[weekstart:weekend], STmodel_data$Con
 
 ## Load data 
 
-testset_shortterm<- read.csv("./Data/ST_results_test_set.csv")
+testset_shortterm<- read.csv("./data_for_R_code/ST_results_test_set.csv")
 
 
 # Add model results to test set dataframe. Because the predictor variables (hours) are 
@@ -129,21 +130,21 @@ for (i in 1:12){
 # Visually inspect if everything worked as intended.
 
 testset_shortterm$index <- 1:nrow(testset_shortterm)
-STmodel_data <- read.csv('./Data/STmodel_data.csv')
+STmodel_data <- read.csv('./data_for_R_code/STmodel_data.csv')
 
 ggplot()+  geom_line(aes(STmodel_data$index[5000:5268], STmodel_data$deterministic_fitted[5000:5268],  colour="modelold"))+
   geom_line(aes(testset_shortterm$index[5000:5180], testset_shortterm$short_det[5000:5180], colour="modelnew"))
 
 # If the graphs are overlapping perfectly and change color everything is correct 
 
-write.csv(testset_shortterm,"./Data/ST_results_test_set.csv", row.names = FALSE)
+write.csv(testset_shortterm,"./data_for_R_code/ST_results_test_set.csv", row.names = FALSE)
 
 
 
 ##### Stochastic short-term models  ----
 ### Calculating different models for each month  --> 12 models
 # Note 1:  Calculating the AR models takes a very long time due to the high order and seasonality of p and q.
-#          Models have already been calculated and can be found in ./Models/shortterm_stochastic
+#          Models have already been calculated and can be found in ./data_for_R_code/shortterm_models/arima
 # Note 2:  The following code calculates the AR models for each month separately. This is done, so that the 
 #          process is more clear and easy to follow, even though a function could easily be written that takes 
 #          the respective month as input and returns the best AR model. 
@@ -153,8 +154,8 @@ library(forecast)
 
 #Load data
 
-STmodel_data <- read.csv('./Data/STmodel_data.csv')
-testset_shortterm <- read.csv("./Data/ST_results_test_set.csv")
+STmodel_data <- read.csv('./data_for_R_code/STmodel_data.csv')
+testset_shortterm <- read.csv("./data_for_R_code/ST_results_test_set.csv")
 testset_shortterm$res    <- testset_shortterm$actual - testset_shortterm$short_det
 
 
@@ -203,7 +204,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_jan <- Arima(res_jan, order = c(p_order, d, q_order))
 
-save(best_model_jan,file="./Models/shortterm_stochastic/fit.jan.Rdata")
+save(best_model_jan,file="./data_for_R_code/shortterm_models/arima/fit.jan.Rdata")
 
 
 # Feb ----
@@ -248,7 +249,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 #write.csv(test_df,"./Data/short_term_feb.csv")
 
 best_model_feb <- Arima(res_feb, order = c(p_order, d, q_order))
-save(best_model_feb,file="./Models/shortterm_stochastic/fit.feb.Rdata")
+save(best_model_feb,file="./data_for_R_code/shortterm_models/arima/fit.feb.Rdata")
 
 
 # Mar ----
@@ -294,7 +295,7 @@ write.csv(test_df,"./Data/short_term_mar.csv")
 
 best_model_mar <- Arima(res_mar, order = c(p_order, d, q_order))
 
-save(best_model_mar,file="./Models/shortterm_stochastic/fit.mar.Rdata")
+save(best_model_mar,file="./data_for_R_code/shortterm_models/arima/fit.mar.Rdata")
 
 
 #Apr ----
@@ -338,7 +339,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_apr <- Arima(res_apr, order = c(p_order, d, q_order))
 
-save(best_model_apr,file="./Models/shortterm_stochastic/fit.apr.Rdata")
+save(best_model_apr,file="./data_for_R_code/shortterm_models/arima/fit.apr.Rdata")
 
 
 # May ----
@@ -383,7 +384,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_may <- Arima(res_may, order = c(p_order, d, q_order))
 
-save(best_model_may,file="./Models/shortterm_stochastic/fit.may.Rdata")
+save(best_model_may,file="./data_for_R_code/shortterm_models/arima/fit.may.Rdata")
 
 
 # Jun ----
@@ -429,7 +430,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_jun <- Arima(res_jun, order = c(p_order, d, q_order))
 
-save(best_model_jun,file="./Models/shortterm_stochastic/fit.jun.Rdata")
+save(best_model_jun,file="./data_for_R_code/shortterm_models/arima/fit.jun.Rdata")
 
 
 # Jul ----
@@ -473,7 +474,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_jul <- Arima(res_jul, order = c(p_order, d, q_order))
 
-save(best_model_jul,file="./Models/shortterm_stochastic/fit.jul.Rdata")
+save(best_model_jul,file=".data_for_R_code/shortterm_models/arima/fit.jul.Rdata")
 
 
 # Aug ----
@@ -517,7 +518,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_aug <- Arima(res_aug, order = c(p_order, d, q_order))
 
-save(best_model_aug,file="./Models/shortterm_stochastic/fit.aug.Rdata")
+save(best_model_aug,file="./data_for_R_code/shortterm_models/arima/fit.aug.Rdata")
 
 
 # Sep ----
@@ -561,7 +562,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_sep <- Arima(res_sep, order = c(p_order, d, q_order))
 
-save(best_model_sep,file="./Models/shortterm_stochastic/fit.sep.Rdata")
+save(best_model_sep,file="./data_for_R_code/shortterm_models/arima/fit.sep.Rdata")
 
 
 # Oct ----
@@ -605,7 +606,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_oct <- Arima(res_oct, order = c(p_order, d, q_order))
 
-save(best_model_oct,file="./Models/shortterm_stochastic/fit.oct.Rdata")
+save(best_model_oct,file="./data_for_R_code/shortterm_models/arima/fit.oct.Rdata")
 
 
 # Nov ----
@@ -649,7 +650,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_nov <- Arima(res_nov, order = c(p_order, d, q_order))
 
-save(best_model_nov,file="./Models/shortterm_stochastic/fit.nov.Rdata")
+save(best_model_nov,file="./data_for_R_code/shortterm_models/arima/fit.nov.Rdata")
 
 
 # Dec ----
@@ -693,7 +694,7 @@ q_order <- test_df$q[test_df$res_ratio==min(test_df$res_ratio)]
 
 best_model_dec <- Arima(res_dec, order = c(p_order, d, q_order))
 
-save(best_model_dec,file="./Models/shortterm_stochastic/fit.dec.Rdata")
+save(best_model_dec,file="./data_for_R_code/shortterm_models/arima/fit.dec.Rdata")
 
 
 ##### Combine all models  ----
@@ -706,7 +707,7 @@ STmodel_data$stoch <- 0
 testset_shortterm$stoch <-0
 library(forecast)
 for (i in 1:12){
-  path_to_model=paste0("./Models/shortterm_stochastic/fit.",month_list[i],".Rdata")
+  path_to_model=paste0("./data_for_R_code/shortterm_models/arima/fit.",month_list[i],".Rdata")
   load(file=path_to_model)
   a=paste0("best_model_",month_list[i])
   model= get(a)
@@ -733,7 +734,7 @@ all_results_shortterm$stoch[52561:70080] <- testset_shortterm$stoch
 all_results_shortterm$full_model <- all_results_shortterm$deterministic_fitted+ all_results_shortterm$stoch
 
 
-write.csv(all_results_shortterm,"./Data/all_results_shortterm.csv",row.names = F)
+write.csv(all_results_shortterm,"./data_for_R_code/all_results_shortterm.csv",row.names = F)
 
 
 res <- all_results_shortterm$Consumption[52561:70080]- all_results_shortterm$deterministic_fitted[52561:70080]
@@ -747,7 +748,7 @@ library(ggplot2)
 # load local library for plotting
 source('./ggplot_theme_Publication/ggplot_theme_Publication-2.R')
 
-all_results_shortterm <- read.csv("./Data/all_results_shortterm.csv") 
+all_results_shortterm <- read.csv("./data_for_R_code/all_results_shortterm.csv") 
 all_results_shortterm$index <- 1:nrow(all_results_shortterm)
 
 ### Deterministic plots ----
@@ -777,7 +778,7 @@ STplot_sample_week_training <- ggplot(all_results_shortterm[weekstart:weekend,])
 STplot_sample_week_training
 
 
-ggsave(file="./Plots/STplot_trainingset_det.png", plot=STplot_sample_week_training, width=12, height=8)
+ggsave(file="./plots/STplot_trainingset_det.png", plot=STplot_sample_week_training, width=12, height=8)
 
 
 # September 2019
@@ -804,7 +805,7 @@ STplot_sample_week_test <- ggplot(all_results_shortterm[weekstart:weekend,])+geo
 
 STplot_sample_week_test
 
-ggsave(file="./Plots/STplot_testset_det.png", plot=STplot_sample_week_test, width=12, height=8)
+ggsave(file="./plots/STplot_testset_det.png", plot=STplot_sample_week_test, width=12, height=8)
 
 
 ### Combined plots ----
@@ -833,7 +834,7 @@ STplot_sample_week_training_full <- ggplot(all_results_shortterm[weekstart:weeke
 
 STplot_sample_week_training_full
 
-ggsave(file="./Plots/STplot_trainingset_combined.png", plot=STplot_sample_week_training_full, width=12, height=8)
+ggsave(file="./plots/STplot_trainingset_combined.png", plot=STplot_sample_week_training_full, width=12, height=8)
 
 
 # September 2019
@@ -860,7 +861,7 @@ STplot_sample_week_test_full <- ggplot(all_results_shortterm[weekstart:weekend,]
 
 STplot_sample_week_test_full
 
-ggsave(file="./Plots/STplot_testset_full.png", plot=STplot_sample_week_test_full, width=12, height=8)
+ggsave(file="./plots/STplot_testset_full.png", plot=STplot_sample_week_test_full, width=12, height=8)
 
 
 

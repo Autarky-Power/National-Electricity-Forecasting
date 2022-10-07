@@ -14,7 +14,7 @@ source('./ggplot_theme_Publication/ggplot_theme_Publication-2.R')
 
 ## load macroeconomic variables and load data ----
 
-LTmodel_data <- read.csv('./Data/LTmodel_starting_data.csv')
+LTmodel_data <- read.csv('./data_for_R_code/LTmodel_starting_data.csv')
 
 ## make training and test set
 LTmodel_training <- LTmodel_data[1:18,]
@@ -35,10 +35,10 @@ globalmodel <- lm(lm_formula, data= LTmodel_training,na.action="na.fail")
 combinations <- dredge(globalmodel)
 
 # save combinations to not have to calculate again
-write.csv(combinations,"./Data/combinations_final.csv",row.names = F)
+write.csv(combinations,"./data_for_R_code/combinations_final.csv",row.names = F)
 
 # load combinations if calculated
-combinations <- read.csv("./Data/combinations_final.csv")
+combinations <- read.csv("./data_for_R_code/combinations_final.csv")
 
 
 ## k-fold cross validation ----
@@ -83,9 +83,9 @@ for (i in (1:testquant)){
 
 ## save results data frame to not have to compute again
 
-write.csv(results,"./Data/kfold_cv_results.csv",row.names = F)
+write.csv(results,"./data_for_R_code/kfold_cv_results.csv",row.names = F)
 
-results <- read.csv("./Data/kfold_cv_results.csv")
+results <- read.csv("./data_for_R_code/kfold_cv_results.csv")
 
 ## Find best models based on RMSE and MAE
 
@@ -189,7 +189,7 @@ print(model_sanity_check)
 
 
 # save model
-save(model,file = "./Models/longterm/LTmodel_final.Rdata")
+save(model,file = "./data_for_R_code/LTmodel_final.Rdata")
 
 
 ### Residual Plots ----
@@ -233,10 +233,10 @@ LTresiduals
 
 
 # Save plots and data ----
-ggsave(file="./Plots/LTplot_overview_final.png", plot=LTplot_overview, width=12, height=8)
-ggsave(file="./Plots/LTplot_residuals_final.png", plot=LTresiduals, width=12, height=8)
+ggsave(file="./plots/LTplot_overview_final.png", plot=LTplot_overview, width=12, height=8)
+ggsave(file="./plots/LTplot_residuals_final.png", plot=LTresiduals, width=12, height=8)
 
-write.csv(LTmodel_data,"./data/longterm_model_results.csv",row.names = F)
+write.csv(LTmodel_data,"./data_for_R_code/longterm_model_results.csv",row.names = F)
 
 
 
